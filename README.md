@@ -1,110 +1,46 @@
-# Georgia Tech Non-Conference Optimizer
+# How Language Models Handle Ambiguous Instructions
 
-Web app for optimizing Georgia Tech men's basketball non-conference scheduling around NCAA Tournament resume value, using Torvik-style ratings, quadrant thresholds, and historical trajectory priors.
+This repository contains the coding framework for the Georgia Tech CS 4365/6365 IEC Spring 2026 solo project by Alok Patel. It tests how language model outputs vary when prompts are ambiguous because they are missing constraints, use vague goals, or contain conflicting requirements.
 
-## Repo Layout
+The pipeline is intentionally small and reproducible:
 
-```text
-backend/   FastAPI API, SQLite cache, feature engineering, optimizer, backtests
-frontend/  React + TypeScript + Vite dashboard with Recharts visualizations
-data/      Runtime SQLite database created automatically
-```
+1. Load JSONL prompt datasets with controlled variants.
+2. Run repeated trials in deterministic `dry-run` mode or `api` mode.
+3. Log each response with prompt hashes, sampling metadata, and extracted signals.
+4. Analyze within-variant stability and across-variant interpretation drift.
+5. Save machine-readable summaries plus a simple plot under `outputs/runs/`.
 
-## What It Does
-
-- Ingests season ratings through a thin Torvik client with SQLite caching and rate limiting.
-- Ships with seeded mock data for seasons 2020-2026 so the app runs end-to-end without network access.
-- Engineers early-rank, projected end-rank, trajectory, volatility, win probability, and expected quadrant outcomes.
-- Optimizes a non-conference slate with deterministic greedy selection plus local swap search.
-- Backtests the strategy against random schedules over 2020-2025.
-
-## Backend Setup
-
-1. Install `uv` if needed: [uv docs](https://docs.astral.sh/uv/)
-2. Create backend environment and install dependencies:
+## Quickstart
 
 ```bash
-cd /Users/alokpatel/Documents/New\ project/backend
-uv sync
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python src/run_experiments.py --mode dry-run --trials 3
+python src/analyze_outputs.py --run outputs/runs/latest
 ```
 
-3. Optional: copy env defaults and switch off mock mode when you have working Torvik access:
+Optional dataset validation:
 
 ```bash
-cp .env.example .env
+python src/generate_variants.py
 ```
 
-Environment variables:
+## Key Files
 
-- `USE_MOCK_DATA=true` keeps the app fully local and seeded.
-- `TORVIK_BASE_URL=https://www.barttorvik.com`
-- If Torvik later documents an API key flow, add it in `.env` and extend the thin adapter in [`backend/app/services/torvik.py`](/Users/alokpatel/Documents/New project/backend/app/services/torvik.py).
+- `data/`: synthetic and summarized real-world prompt datasets
+- `src/run_experiments.py`: experiment runner
+- `src/analyze_outputs.py`: metric computation and plot generation
+- `INSTRUCTIONS.md`: AI-oriented setup and reproduction guide
+- `docs/CHECKPOINT2_FEEDBACK_LLM.md`: checkpoint feedback template
 
-4. Run the backend:
+## Output Summary
 
-```bash
-cd /Users/alokpatel/Documents/New\ project/backend
-uv run uvicorn app.main:app --reload --port 8000
-```
+Each run writes to `outputs/runs/<timestamp>/`:
 
-API base URL: `http://localhost:8000/api`
+- `responses.jsonl`
+- `run_config.json`
+- `summary.json`
+- `summary.csv`
+- `plots/metric_vs_variant.png`
 
-## Frontend Setup
-
-1. Install frontend dependencies:
-
-```bash
-cd /Users/alokpatel/Documents/New\ project/frontend
-npm install
-```
-
-2. Optional: copy the frontend env file if you want a custom API base URL:
-
-```bash
-cp .env.example .env
-```
-
-3. Run the frontend:
-
-```bash
-cd /Users/alokpatel/Documents/New\ project/frontend
-npm run dev
-```
-
-Open `http://localhost:5173`.
-
-## Makefile Shortcuts
-
-From repo root:
-
-```bash
-make backend
-make frontend
-```
-
-## API Endpoints
-
-- `GET /api/seasons`
-- `GET /api/teams?season=2026`
-- `GET /api/team/GT/metrics?season=2026`
-- `GET /api/candidates?season=2026&preset=balanced&location=home`
-- `POST /api/optimize`
-- `GET /api/schedule/{id}`
-- `GET /api/overview`
-- `GET /api/backtests?preset=balanced`
-
-## Torvik Adapter Notes
-
-- The live client is intentionally thin and caches raw responses in SQLite.
-- Since Torvik access formats can change, the app defaults to mock mode and falls back to seeded local data if live parsing fails.
-- The adapter lives in [`backend/app/services/torvik.py`](/Users/alokpatel/Documents/New project/backend/app/services/torvik.py) and is structured so endpoint parsing can be updated without touching the rest of the system.
-
-## Defaults
-
-- Current season: `2026`
-- Non-conference slots: `10`
-- Max away games: `4`
-- Min home games: `5`
-- Fixed SEC game: Georgia at home in the baseline examples
-- Risk presets: `balanced`, `aggressive`, `safe`
-
+`outputs/runs/latest/` is refreshed to mirror the newest run for convenience.

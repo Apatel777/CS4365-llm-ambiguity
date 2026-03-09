@@ -6,7 +6,3 @@ __pycache__/
 outputs/.cache/
 outputs/.mplconfig/
 outputs/runs/latest/
-backend/.venv/
-frontend/node_modules/
-frontend/dist/
-data/*.db
