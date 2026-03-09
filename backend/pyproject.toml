@@ -1,0 +1,23 @@
+[project]
+name = "gt-nonconf-optimizer-backend"
+version = "0.1.0"
+description = "FastAPI backend for Georgia Tech basketball schedule optimization"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.116.0",
+  "uvicorn[standard]>=0.35.0",
+  "pydantic>=2.11.0",
+  "pydantic-settings>=2.8.0",
+  "sqlalchemy>=2.0.39",
+  "httpx>=0.28.1",
+  "aiosqlite>=0.21.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+]
+
+[tool.uv]
+package = true
+
