@@ -9,7 +9,7 @@ This document is a repository-side template for checkpoint feedback. It separate
 - Student: Alok Patel
 - Group: Solo
 - Checkpoint: 2
-- Repository URL: `<paste GitHub repo link>`
+- Repository URL: 'https://github.com/Apatel777/CS4365-llm-ambiguity'
 - Evidence run directory: `<paste outputs/runs/<timestamp> path or GitHub link>`
 
 ## Rubric Alignment
